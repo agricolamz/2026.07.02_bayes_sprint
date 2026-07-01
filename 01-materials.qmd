@@ -4,7 +4,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Мой путь в байесианстве
+## Мой путь в байесовской статистике
 
 - [@robinson2017]
 - Курсы на DataCamp
@@ -12,7 +12,32 @@ editor_options:
   - Rasmus Bååth --- Fundamentals of Bayesian Data Analysis in R
   - Alicia Johnson --- Bayesian Modeling with `RJAGS`
   - Jake Thompson --- Bayesian regression modeling with `rstanarm`
-- учился на SMLP 2019, Bruno Nicenboim --- Advanced Bayesian analysis
+- учился на SMLP 2019 у Bruno Nicenboim на Advanced Bayesian analysis
 - преподавал на двух байесовских курсах в рамках матсерской АнДана на Летней Школе
 - веду курс по анализу данных для лингвистов, в котором с каждым годом все больше байесовской статистики
 - в 2026-ом году послушал курсы R. McElreath "Statistical Rethinking"
+- ... думаю, он еще не завершен.
+
+## Учебники по байесовской статистике...
+
+... которые я открывал (кроме одной) и могу рекоммендовать. Но их уже тучи: в каждом западном крупном издательстве вышло по две-три.
+
+```{r}
+#| echo: false
+#| layout-ncol: 3
+#| fig-subcap:
+#|   - "[@gelman2026]"
+#|   - "[@mcelreath2020]"
+#|   - "[@gelman2014]"
+#|   - "[@kruschke2014]"
+#|   - "[@robinson2017]"
+#|   - "[@efron2017]"
+
+knitr::include_graphics("images/01.png")
+knitr::include_graphics("images/02.jpg")
+knitr::include_graphics("images/03.png")
+knitr::include_graphics("images/04.png")
+knitr::include_graphics("images/05.png")
+knitr::include_graphics("images/06.png")
+```
+
