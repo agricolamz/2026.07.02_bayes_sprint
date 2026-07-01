@@ -12,6 +12,7 @@ book:
     - 01-materials.qmd
     - 02-distributions.qmd
     - 03-likelihood.qmd
+    - 04-intro-to-Bayes.qmd
     
 execute:
   freeze: auto
