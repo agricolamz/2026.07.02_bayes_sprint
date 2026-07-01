@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "Байесовский спринт",
     "section": "",
-    "text": "Введение\nДанный спринт основан на материалах для курса Анализа данных для лингвистов, Школа лингвистики НИУ ВШЭ.\nК сожалению, сейчас можно столкнуться с тем, что пакеты в России не скачиваются:",
+    "text": "Введение\nДанный спринт основан на материалах для курса Анализа данных для лингвистов, Школа лингвистики НИУ ВШЭ.\nЯ ожидаю, что участники будут повторять за мной в RStudio c уже установленным R. Однако, если R не Ваш основной язык (а RStudio не Ваш основной IDE), то можете использовать альтернативы:\nК сожалению, сейчас можно столкнуться с тем, что пакеты в России c зеркала по-умолчанию не скачиваются. Их нужно поменять:",
     "crumbs": [
       "Введение"
     ]
@@ -14,7 +14,7 @@
     "href": "index.html#введение",
     "title": "Байесовский спринт",
     "section": "",
-    "text": "Для обычных пользователейДля более продвинутых пользователей\n\n\nМожно перед каждой установкой пакетов (один раз за сессию) поменять зеркало\n\noptions(repos=\"https://mirror.truenetwork.ru/CRAN/\")\n\n\n\nМожно прописать options(repos=\"https://mirror.truenetwork.ru/CRAN/\") в файле .Rprofile. Если Вы не знаете, где он у Вас живет, можно открыть его командой:\n\nusethis::edit_r_profile()",
+    "text": "Positron — альтернативный RStudio IDE\nposit.cloud — облачный вариант RStudio\njupyter-ноутбуки\nGoogle Colab\n\n\n\nДля обычных пользователейДля более продвинутых пользователей\n\n\nМожно перед каждой установкой пакетов (один раз за сессию) поменять зеркало\n\noptions(repos=\"https://mirror.truenetwork.ru/CRAN/\")\n\n\n\nМожно прописать options(repos=\"https://mirror.truenetwork.ru/CRAN/\") в файле .Rprofile. Если Вы не знаете, где он у Вас живет, можно открыть его командой:\n\nusethis::edit_r_profile()",
     "crumbs": [
       "Введение"
     ]
@@ -24,7 +24,7 @@
     "href": "index.html#используемые-пакеты",
     "title": "Байесовский спринт",
     "section": "Используемые пакеты",
-    "text": "Используемые пакеты\n\npackageVersion(\"tidyverse\")\n\n[1] '2.0.0'\n\npackageVersion(\"fitdistrplus\")\n\n[1] '1.2.6'\n\npackageVersion(\"ggeffects\")\n\n[1] '2.3.2'\n\npackageVersion(\"brms\")\n\n[1] '2.23.0'\n\npackageVersion(\"tidybayes\")\n\n[1] '3.0.7'",
+    "text": "Используемые пакеты\n\npackageVersion(\"tidyverse\")\n\n[1] '2.0.0'\n\npackageVersion(\"fitdistrplus\")\n\n[1] '1.2.6'\n\npackageVersion(\"ggeffects\")\n\n[1] '2.3.2'\n\npackageVersion(\"rstan\")\n\n[1] '2.32.7'\n\npackageVersion(\"brms\")\n\n[1] '2.23.0'\n\npackageVersion(\"tidybayes\")\n\n[1] '3.0.7'",
     "crumbs": [
       "Введение"
     ]

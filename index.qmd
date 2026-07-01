@@ -2,7 +2,14 @@
 
 Данный спринт основан на материалах для курса Анализа данных для лингвистов, Школа лингвистики НИУ ВШЭ.
 
-К сожалению, сейчас можно столкнуться с тем, что пакеты в России не скачиваются:
+Я ожидаю, что участники будут повторять за мной в RStudio c уже установленным R. Однако, если R не Ваш основной язык (а RStudio не Ваш основной IDE), то можете использовать альтернативы:
+
+- Positron --- альтернативный RStudio IDE
+- posit.cloud --- облачный вариант RStudio
+- jupyter-ноутбуки
+- Google Colab
+
+К сожалению, сейчас можно столкнуться с тем, что пакеты в России c зеркала по-умолчанию не скачиваются. Их нужно поменять:
 
 ::: {.panel-tabset}
 
@@ -31,6 +38,7 @@ usethis::edit_r_profile()
 packageVersion("tidyverse")
 packageVersion("fitdistrplus")
 packageVersion("ggeffects")
+packageVersion("rstan")
 packageVersion("brms")
 packageVersion("tidybayes")
 ```
