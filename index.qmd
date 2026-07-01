@@ -4,7 +4,7 @@
 
 Я ожидаю, что участники будут повторять за мной в RStudio c уже установленным R. Однако, если R не Ваш основной язык (а RStudio не Ваш основной IDE), то можете использовать альтернативы:
 
-- [posit.cloud](posit.cloud) --- облачный вариант RStudio
+- [posit.cloud](https://posit.cloud) --- облачный вариант RStudio
 - [Positron](https://positron.posit.co/) --- альтернативный RStudio IDE
 - [jupyter-ноутбуки](https://jupyter.org/)
 - [Google Colab](https://colab.research.google.com/)
