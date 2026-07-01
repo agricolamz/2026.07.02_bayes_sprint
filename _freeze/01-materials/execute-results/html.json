@@ -1,0 +1,19 @@
+{
+  "hash": "386e6482f69cc5551684432185735429",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: Материалы\neditor_options: \n  chunk_output_type: console\n---\n\n## Мой путь в байесовской статистике\n\n- [@robinson2017]\n- Курсы на DataCamp\n  - Jim Albert --- Beginning Bayes with R\n  - Rasmus Bååth --- Fundamentals of Bayesian Data Analysis in R\n  - Alicia Johnson --- Bayesian Modeling with `RJAGS`\n  - Jake Thompson --- Bayesian regression modeling with `rstanarm`\n- учился на SMLP 2019 у Bruno Nicenboim на Advanced Bayesian analysis\n- преподавал на двух байесовских курсах в рамках матсерской АнДана на Летней Школе\n- веду курс по анализу данных для лингвистов, в котором с каждым годом все больше байесовской статистики\n- в 2026-ом году послушал курсы R. McElreath \"Statistical Rethinking\"\n- ... думаю, он еще не завершен.\n\n## Учебники по байесовской статистике...\n\n... которые я открывал (кроме одной) и могу рекоммендовать. Но их уже тучи: в каждом западном крупном издательстве вышло по две-три.\n\n\n::: {.cell layout-ncol=\"3\"}\n::: {.cell-output-display}\n![[@gelman2026]](images/01.png){width=871}\n:::\n\n::: {.cell-output-display}\n![[@mcelreath2020]](images/02.jpg){width=508}\n:::\n\n::: {.cell-output-display}\n![[@gelman2014]](images/03.png){width=818}\n:::\n\n::: {.cell-output-display}\n![[@kruschke2014]](images/04.png){width=713}\n:::\n\n::: {.cell-output-display}\n![[@robinson2017]](images/05.png){width=925}\n:::\n\n::: {.cell-output-display}\n![[@efron2017]](images/06.png){width=797}\n:::\n:::\n\n\n## Зачем этот спринт?\n\n- расширить комьюнити и найти единомышленников\n- найти концептуальные пробелы\n- улучшить читаемый курс\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {
+      "include-in-header": [
+        "<link href=\"site_libs/pagedtable-1.1/css/pagedtable.css\" rel=\"stylesheet\" />\n<script src=\"site_libs/pagedtable-1.1/js/pagedtable.js\"></script>\n"
+      ]
+    },
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
