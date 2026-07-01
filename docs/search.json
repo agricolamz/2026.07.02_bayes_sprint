@@ -14,7 +14,7 @@
     "href": "index.html#введение",
     "title": "Байесовский спринт",
     "section": "",
-    "text": "Positron — альтернативный RStudio IDE\nposit.cloud — облачный вариант RStudio\njupyter-ноутбуки\nGoogle Colab\n\n\n\nДля обычных пользователейДля более продвинутых пользователей\n\n\nМожно перед каждой установкой пакетов (один раз за сессию) поменять зеркало\n\noptions(repos=\"https://mirror.truenetwork.ru/CRAN/\")\n\n\n\nМожно прописать options(repos=\"https://mirror.truenetwork.ru/CRAN/\") в файле .Rprofile. Если Вы не знаете, где он у Вас живет, можно открыть его командой:\n\nusethis::edit_r_profile()",
+    "text": "posit.cloud — облачный вариант RStudio\nPositron — альтернативный RStudio IDE\njupyter-ноутбуки\nGoogle Colab\n\n\n\nДля обычных пользователейДля более продвинутых пользователей\n\n\nМожно перед каждой установкой пакетов (один раз за сессию) поменять зеркало\n\noptions(repos=\"https://mirror.truenetwork.ru/CRAN/\")\n\n\n\nМожно прописать options(repos=\"https://mirror.truenetwork.ru/CRAN/\") в файле .Rprofile. Если Вы не знаете, где он у Вас живет, можно открыть его командой:\n\nusethis::edit_r_profile()",
     "crumbs": [
       "Введение"
     ]

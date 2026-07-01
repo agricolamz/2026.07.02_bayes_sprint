@@ -4,10 +4,10 @@
 
 Я ожидаю, что участники будут повторять за мной в RStudio c уже установленным R. Однако, если R не Ваш основной язык (а RStudio не Ваш основной IDE), то можете использовать альтернативы:
 
-- Positron --- альтернативный RStudio IDE
-- posit.cloud --- облачный вариант RStudio
-- jupyter-ноутбуки
-- Google Colab
+- [posit.cloud](posit.cloud) --- облачный вариант RStudio
+- [Positron](https://positron.posit.co/) --- альтернативный RStudio IDE
+- [jupyter-ноутбуки](https://jupyter.org/)
+- [Google Colab](https://colab.research.google.com/)
 
 К сожалению, сейчас можно столкнуться с тем, что пакеты в России c зеркала по-умолчанию не скачиваются. Их нужно поменять:
 
