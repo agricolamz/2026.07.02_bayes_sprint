@@ -1,0 +1,21 @@
+project:
+  type: book
+  output-dir: docs
+  
+book:
+  title: "Байесовский спринт"
+  author: "Г. А. Мороз"
+  language: ru
+  repo-url: https://github.com/agricolamz/2026.07.02_bayes_sprint/
+  chapters:
+    - index.qmd
+    - 01-materials.qmd
+    
+callout-appearance: simple
+callout-icon: false
+bibliography: bibliography.bib
+
+format:
+  html:
+    theme: cosmo
+    df-print: paged

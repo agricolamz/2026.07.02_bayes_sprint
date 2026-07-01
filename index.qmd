@@ -1,0 +1,36 @@
+## Введение {.unnumbered}
+
+Данный спринт основан на материалах для курса Анализа данных для лингвистов, Школа лингвистики НИУ ВШЭ.
+
+К сожалению, сейчас можно столкнуться с тем, что пакеты в России не скачиваются:
+
+::: {.panel-tabset}
+
+### Для обычных пользователей
+
+Можно перед каждой установкой пакетов (один раз за сессию) поменять зеркало
+
+```{r, eval=FALSE}
+options(repos="https://mirror.truenetwork.ru/CRAN/")
+```
+
+### Для более продвинутых пользователей
+
+Можно прописать `options(repos="https://mirror.truenetwork.ru/CRAN/")` в файле `.Rprofile`. Если Вы не знаете, где он у Вас живет, можно открыть его командой:
+
+```{r, eval=FALSE}
+usethis::edit_r_profile()
+```
+
+:::
+
+
+## Используемые пакеты
+
+```{r}
+packageVersion("tidyverse")
+packageVersion("fitdistrplus")
+packageVersion("ggeffects")
+packageVersion("brms")
+packageVersion("tidybayes")
+```

@@ -1,0 +1,52 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Байесовский спринт",
+    "section": "",
+    "text": "Введение\nДанный спринт основан на материалах для курса Анализа данных для лингвистов, Школа лингвистики НИУ ВШЭ.\nК сожалению, сейчас можно столкнуться с тем, что пакеты в России не скачиваются:",
+    "crumbs": [
+      "Введение"
+    ]
+  },
+  {
+    "objectID": "index.html#введение",
+    "href": "index.html#введение",
+    "title": "Байесовский спринт",
+    "section": "",
+    "text": "Для обычных пользователейДля более продвинутых пользователей\n\n\nМожно перед каждой установкой пакетов (один раз за сессию) поменять зеркало\n\noptions(repos=\"https://mirror.truenetwork.ru/CRAN/\")\n\n\n\nМожно прописать options(repos=\"https://mirror.truenetwork.ru/CRAN/\") в файле .Rprofile. Если Вы не знаете, где он у Вас живет, можно открыть его командой:\n\nusethis::edit_r_profile()",
+    "crumbs": [
+      "Введение"
+    ]
+  },
+  {
+    "objectID": "index.html#используемые-пакеты",
+    "href": "index.html#используемые-пакеты",
+    "title": "Байесовский спринт",
+    "section": "Используемые пакеты",
+    "text": "Используемые пакеты\n\npackageVersion(\"tidyverse\")\n\n[1] '2.0.0'\n\npackageVersion(\"fitdistrplus\")\n\n[1] '1.2.6'\n\npackageVersion(\"ggeffects\")\n\n[1] '2.3.2'\n\npackageVersion(\"brms\")\n\n[1] '2.23.0'\n\npackageVersion(\"tidybayes\")\n\n[1] '3.0.7'",
+    "crumbs": [
+      "Введение"
+    ]
+  },
+  {
+    "objectID": "01-materials.html",
+    "href": "01-materials.html",
+    "title": "1  Материалы",
+    "section": "",
+    "text": "1.1 Мой путь в байесианстве",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Материалы</span>"
+    ]
+  },
+  {
+    "objectID": "01-materials.html#мой-путь-в-байесианстве",
+    "href": "01-materials.html#мой-путь-в-байесианстве",
+    "title": "1  Материалы",
+    "section": "",
+    "text": "(Robinson 2017)\nКурсы на DataCamp\n\nJim Albert — Beginning Bayes with R\nRasmus Bååth — Fundamentals of Bayesian Data Analysis in R\nAlicia Johnson — Bayesian Modeling with RJAGS\nJake Thompson — Bayesian regression modeling with rstanarm\n\nучился на SMLP 2019, Bruno Nicenboim — Advanced Bayesian analysis\nпреподавал на двух байесовских курсах в рамках матсерской АнДана на Летней Школе\nведу курс по анализу данных для лингвистов, в котором с каждым годом все больше байесовской статистики\nв 2026-ом году послушал курсы R. McElreath “Statistical Rethinking”\n\n\n\n\n\nRobinson, D. 2017. “Introduction to Empirical Bayes: Examples from Baseball Statistics.” D. Robinson. Introduction to Empirical Bayes: Examples from Baseball Statistics.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Материалы</span>"
+    ]
+  }
+]

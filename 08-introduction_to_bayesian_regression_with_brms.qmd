@@ -1,0 +1,705 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# Байесовский регрессионный анализ
+
+```{r setup08}
+#| include: false
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(tidyverse)
+library(brms)
+theme_set(theme_bw())
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+В основном, мы до этого момента пытались оценить параметры распределения некоторой переменной, однако чаще  всего в научной литературе мы пытаемся оценить связь нескольких переменных. Регрессионный анализ как раз такой метод, который позволяет оценить связь некоторой переменной от некоторого набора зависимых переменных.
+
+## Основы регрессионного анализа
+
+```{r}
+#| echo: false
+#| warning: false
+
+set.seed(42)
+tibble(x = rnorm(150)+1) |> 
+  mutate(y = 5*x+10+rnorm(100, sd = 2)) |> 
+  ggplot(aes(x, y))+
+  geom_point()+
+  geom_hline(yintercept = 0, linetype = 2)+
+  geom_vline(xintercept = 0, linetype = 2)+
+  geom_smooth(method = "lm", se = FALSE)+
+  annotate(geom = "point", x = 0, y = 10, size = 4, color = "red")+
+  annotate(geom = "label", x = -0.5, y = 12, size = 5, color = "red", label = "intercept")+
+  annotate(geom = "label", x = 2, y = 12.5, size = 5, color = "red", label = "slope")+
+  scale_x_continuous(breaks = -2:4)+
+  scale_y_continuous(breaks = c(0:3*10, 15))
+pBrackets::grid.brackets(815, 420, 815, 545, lwd=2, col="red")
+```
+
+Когда мы используем регрессионный анализ, мы пытаемся оценить два параметра:
+
+- свободный член (intercept) --- значение $y$ при $x = 0$;
+- угловой коэффициент (slope) --- изменение $y$ при изменении $x$ на одну единицу.
+
+$$y_i = \hat{\beta_0} + \hat{\beta_1}\times x_i + \epsilon_i$$
+
+Причем, иногда мы можем один или другой параметр считать равным нулю.
+
+При этом, вне зависимости от статистической школы, у регрессии есть свои ограничения на применение:
+
+- линейность связи между $x$ и $y$;
+- нормальность распределение остатков $\epsilon_i$;
+- гомоскидастичность --- равномерность распределения остатков на всем протяжении $x$;
+- независимость переменных;
+- независимость наблюдений друг от друга.
+
+Припомнив предыдущий раздел, мы можем представить связь и в другой нотации:
+
+$$y_{n} \sim Normal(\mu = \hat{\beta_0} + \hat{\beta_1}\times x_{n}, \sigma =  \epsilon)$$
+
+## Регрессионная модель в `brms`
+
+::: {.callout-note}
+В работе [@stepanova11] сообщается, что средняя скорость речи на русском языке составляет 5.31 слогов в секунду (стандартное отклонение 1.93). Скачайте [данные](https://raw.githubusercontent.com/agricolamz/2026_HSE_b_da4l/master/data/speech_tempo_zvenigorod.csv) корпуса г. Звенигород (<https://lingconlab.ru/zvenigorod/>) и оцените какой  эффект на скорость речи носителя `ea1976` оказывает разное количество гласных в высказывании, используя данные из [@stepanova11] в качестве априорного распределения. Визуализируйте получившееся распределение.
+:::
+
+```{r}
+library(brms)
+n_cores <- 15 # parallel::detectCores() - 1
+
+read_csv("https://raw.githubusercontent.com/agricolamz/2026_HSE_b_da4l/master/data/speech_tempo_zvenigorod.csv") |> 
+  filter(speaker == "ea1976") ->
+  df
+
+get_prior(speech_tempo ~ n_vowels, 
+          family = gaussian(),
+          data = df) 
+```
+
+Исходя из формулы выше, нам нужно определить априорное распределение для
+
+- свободного члена;
+- углового коэффециента;
+- распределения остатков.
+
+```{r fit1}
+#| cache: true
+#| message: false
+
+fit1 <- brm(speech_tempo ~ n_vowels,
+            data = df,
+            family = gaussian(),
+            cores = n_cores,
+            silent = TRUE,
+            prior = c(prior(normal(5.31, 1.93), class = "Intercept", lb = 0),
+                      prior(normal(0, 1), class = "sigma", lb = 0),
+                      prior(normal(0, 10), class = "b", lb = 0)))
+```
+
+После того, как функция отработала, мы можем проанализировать то, что мы получили в результате ее работы. Мы оценили три параметра:
+
+```{r}
+plot(fit1)
+```
+
+Стоит обратить внимание на сходимость цепей. Если все цепи накладываются друг на друга и выглядят как волосатые гусеницы --- все в порядке. Вот пример плохой сходимости цепей:
+
+```{r}
+#| echo: false
+
+knitr::include_graphics("images/bad_chains.png")
+```
+
+Видно, что цепи исследуют разное пространство и "устаканились" каждая на своем уровне. Кроме того, может быть такое, что цепи в принципе на одном уровне, но где-нибудь по середине делает скачок в сторону, а потом возвращается.
+
+```{r}
+#| echo: false
+
+knitr::include_graphics("images/bad_chains2.png")
+```
+
+Метрики модели можно посмотреть, просто вызвав переменную с моделью.
+
+```{r}
+fit1
+```
+
+Метрики качества модели: R-hat, Bulk_ESS и Tail_ESS
+
+R-hat -- это диагностика сходимости, которая сравнивает оценку модели, которая получается внутри цепи и между цепями (введена в [@gelman92]). Если цепи не перемешались (например, если нет согласия внутри цепи и между цепями) R-hat будет иметь значение больше 1. Собственно для этого рекоммендуется запускать по-крайней мере 4 цепи. Stan возвращает что-то более сложное, что называется maximum of rank normalized split-R-hat и rank normalized folded-split-R-hat, однако мы не будем в этом разбиратсья, отсылаю к [статье](https://arxiv.org/abs/1903.08008) или [к посту](https://statmodeling.stat.columbia.edu/2019/03/19/maybe-its-time-to-let-the-old-ways-die-or-we-broke-r-hat-so-now-we-have-to-fix-it/) в блоге одного из авторов с объяснением.
+
+**Самое главное**: $\hat{R} \leq 1.05$ -- значит проблем со сходмиостью цепей не обнаружено.
+
+Bulk ESS (Effective sample size) --- это оценка качества сэмплирования в середине апостериорного распределения, а Tail ESS --- в краях апостериорного распределения. Чем выше ESS -- тем лучше.
+
+Мы можем визуализировать полученную регрессию:
+
+```{r}
+fit1 |> 
+  conditional_effects() |> 
+  plot(points=TRUE)
+```
+
+Мы можем визуализировать, насколько скорость речи в данных соотносится с полученным распределением апостериорного распределения:
+
+```{r}
+fit1 |> 
+  pp_check(type = "dens_overlay", ndraws = 50)
+
+fit1 |> 
+  pp_check(type = "stat")
+```
+
+Если хочется предсказать какие-то значения, то можно использовать функцию `predict()`, которая возьмет выборки из апостериорного распределения:
+
+```{r}
+predict(fit1, newdata = tibble(n_vowels = c(10, 20)))
+```
+
+
+## Альтернативная модель
+
+Мы можем использовать тот же самый код, но попробовать в качестве переменной использовать логорифм количества гласных. Для того, чтобы использовать какие-то арифемтические операции внутри регрессионной формулы, нужно использовать функцию `I()` или сделать какие-то модификации переменных до того, как использовать в регрессии. 
+
+```{r}
+get_prior(speech_tempo ~ I(log(n_vowels)), 
+          data = df, 
+          family = gaussian())
+```
+
+
+```{r fit2}
+#| cache: true
+#| message: false
+
+fit2 <- brm(speech_tempo ~ I(log(n_vowels)), 
+            data = df,
+            family = gaussian(),
+            cores = n_cores,
+            silent = TRUE,
+            prior = c(prior(normal(5.31, 1.93), class = "Intercept", lb = 0), 
+                      prior(normal(0, 1), class = "sigma", lb = 0),
+                      prior(normal(0, 10), class = "b", lb = 0)))
+```
+
+```{r}
+plot(fit2)
+```
+
+```{r}
+fit2 |> 
+  conditional_effects() |> 
+  plot(points=TRUE)
+```
+
+```{r}
+fit2 |> 
+  pp_check(type = "dens_overlay", ndraws = 50)
+
+fit2 |> 
+  pp_check(type = "stat")
+```
+
+Как интерпретировать полученную регрессию с двумя отлогорифмированными значениями?
+
+В обычной линейной регресии мы узнаем отношения между $x$ и  $y$:
+$$y_i = \beta_0+\beta_1\times x_i$$
+
+Как изменится $y_j$, если мы увеличем $x_i + 1 = x_j$?
+$$y_j = \beta_0+\beta_1\times x_j$$
+
+$$y_j - y_i = \beta_0+\beta_1\times x_j - (\beta_0+\beta_1\times x_i)  = \beta_1(x_j - x_i)$$
+
+Т. е. $y$ увеличится на $\beta_1$ , если $x$ увеличится на 1. Что же будет с логарифмированными переменными? Как изменится $y_j$, если мы увеличем $x_i + 1 = x_j$?
+
+$$\log(y_j) - \log(y_i) = \beta_1\times (\log(x_j) - \log(x_i))$$
+
+$$\log\left(\frac{y_j}{y_i}\right) = \beta_1\times \log\left(\frac{x_j}{x_i}\right) = \log\left(\left(\frac{x_j}{x_i}\right) ^ {\beta_1}\right)$$
+
+$$\frac{y_j}{y_i}= \left(\frac{x_j}{x_i}\right) ^ {\beta_1}$$
+
+Т. е. $y$ увеличится на $\beta_1$ процентов, если $x$ увеличится на 1 процент. Эта процентная логика будет работать при любой комбинации. Например, если $y$ не логорифмирован, а $x$ логорифмирован интерпретировать это стоит в той же логике: $y$ увеличится на $\beta_1$, если $x$ увеличится на 1 процент.
+
+::: {.callout-note}
+В работе [@coretta2016] собраны [данные](https://raw.githubusercontent.com/agricolamz/2024_HSE_b_da4l/master/data/Coretta_2017_icelandic.csv) длительности исландских гласных. Используя байесовскую регрессию с априорными распределениями по умолчанию, смоделируйте длительность гласного (`vowel.dur`) в зависимости от придыхания (`aspiration`) у носителя `tt01`. Визуализируйте результаты модели.
+:::
+
+```{r}
+#| include: false
+read_csv("https://raw.githubusercontent.com/agricolamz/2024_HSE_b_da4l/master/data/Coretta_2017_icelandic.csv") |> 
+  filter(speaker == "tt01") -> 
+  vowels
+  
+vowels |> 
+  ggplot(aes(aspiration, vowel.dur))+
+  geom_violin()
+
+get_prior(vowel.dur ~ aspiration,
+          data = vowels)
+```
+
+```{r vowels_fit}
+#| include: false
+#| cache: true
+
+vowels_fit <- brm(vowel.dur ~ aspiration,
+                  data = vowels,
+                  cores = n_cores,
+                  silent = TRUE)
+vowels_fit
+```
+
+
+```{r}
+#| echo: false
+
+plot(vowels_fit)
+
+vowels_fit |> 
+  conditional_effects() |> 
+  plot()
+```
+
+### Сравнение моделей
+
+В работах [@vehtari2017; @vehtari2024] описан метод `loo`, который оценивает leave-one-out кроссвалидацию, которую можно использовать для сравнения байесовских моделей.
+
+```{r}
+fit1 <- add_criterion(fit1, "loo")
+fit1$criteria$loo
+fit2 <- add_criterion(fit2, "loo")
+fit2$criteria$loo
+loo_compare(fit1, fit2, criterion = "loo")
+```
+
+Большее значение ELPD стоит интепретировать как лучшую предсказательную способность модели. Подробнее про эту метрику можно прочитать, запустив `help('pareto-k-diagnostic')`. Еще больше на [странице пакета `loo`](https://mc-stan.org/loo/).
+
+## Категориальные переменные
+
+### Default contrast coding: Treatment contrasts
+
+Чтобы добавить категориальную переменную в регрессионный анализ, она должна подвергнуться некоторому преобразованию. Существует несколько методов, которые позволяют это сделать, байесовский подход лишь заставляет нас помнить, что к чему, чтобы можно было адаптировать априорные распределения. Выше мы уже рассматривали задачу, где была построена модель, предсказывающая длительность гласного на основе придыхания предыдущего согласного.
+
+```{r}
+#| echo: false
+
+vowels_fit |> 
+  conditional_effects() |> 
+  plot()
+```
+
+Как этот график соотносится с оценками параметров модели?
+
+```{r}
+#| echo: false
+
+plot(vowels_fit)
+```
+
+Мы видим, что свободный член (`b_Intercept`) соотносится с отсутствием придыхания, а переменная `b_aspirationyes` с разницей средних между случаев с придыханием и без. Дело в том, что когда запускается регрессию с категориальной переменной, данная переменная автоматически разбивается на группу бинарных dummy-переменных:
+
+```{r}
+#| echo: false
+
+tibble(aspiration = c("без придыхания", "с придыханием"),
+       dummy_aspiration_no = c(1, 0),
+       dummy_aspiration_yes = c(0, 1)) |> 
+  knitr::kable()
+```
+
+Дальше для регрессионного анализа выкидывают одну из переменных, так как иначе модель не сойдется (dummy-переменных всегда n-1, где n --- количество категорий в переменной).
+
+```{r}
+#| echo: false
+
+tibble(aspiration = c("без придыхания", "с придыханием"),
+       dummy_aspiration_yes = c(0, 1)) |> 
+  knitr::kable()
+```
+
+Если переменная `dummy_aspiration_yes` принимает значение 1, значит речь о случаях, где согласный придыхательный, а если принимает значение 0, то о случаях, где согласный непридыхательный. Если вставить нашу переменную в регрессионную формулу получится следующее:
+
+$$y_i = \hat\beta_0 + \hat\beta_1 \times \text{dummy-aspiration-yes} + \epsilon_i,$$
+
+Так как  `dummy_aspiration_yes` принимает либо значение 1, либо значение 0, то получается, что модель предсказывает лишь два значения:
+
+$$y_i = \left\{\begin{array}{ll}\hat\beta_0 + \hat\beta_1 \times 1 + \epsilon_i = \hat\beta_0 + \hat\beta_1 + \epsilon_i\text{, если предыдущий согласный придыхательный}\\ 
+\hat\beta_0 + \hat\beta_1 \times 0 + \epsilon_i = \hat\beta_0 + \epsilon_i\text{, если предыдущий согласный непридыхательный}
+\end{array}\right.$$
+
+Таким образом, получается, что свободный член $\beta_0$ и угловой коэффициент $\beta_1$ в регрессии с категориальной переменной получает другую интерпретацию. Одно из значений переменной кодируется при помощи $\beta_0$, а сумма коэффициентов $\beta_0+\beta_1$ дают другое значение переменной. Так что $\beta_1$ --- это разница между оценками средних двух значений переменной.
+
+В случаях, когда значений больше --- логика будет та же: будет создаваться n-1 dummy переменных, каждый коэффициент при таких переменных будет говорить о разнице средних переменной и некоторого, выделенного в интерсепт значения, которое становится таким эталоном сравнения. Автоматическая процедура отправляет в эталон сравнения уровень, название которого раньше по алфавиту. Если хочется выбрать другой эталон сравнения, то можно использовать функцию `factor()` и эксплицитно задать уровни или же использовать функцию `fct_relevel(your_variable, "make me  the baseline")` из пакета `forcats` (часть `tidyverse`).
+
+### Sum contrasts
+
+Существует и другая стратегия моделирования с категориальной переменной, которая позволяет вернуть логику числовых предикторов, согласно которой свободный член моделирует среднее значение переменной, а коэффициент при категориальной переменной говорит об изменении в предсказываемой переменной, при изменении категориальной переменной.
+
+```{r}
+read_csv("https://raw.githubusercontent.com/agricolamz/2024_HSE_b_da4l/master/data/Coretta_2017_icelandic.csv") |> 
+  filter(speaker == "tt01") |> 
+  mutate(aspiration = factor(aspiration)) ->
+  vowels
+
+contrasts(vowels$aspiration)
+
+contrasts(vowels$aspiration) <- c(-1, 1)
+
+get_prior(vowel.dur ~ aspiration,
+          data = vowels)
+```
+
+
+```{r vowels_fit2}
+#| cache: true
+
+vowels_fit2 <- brm(vowel.dur ~ aspiration,
+                   data = vowels,
+                   cores = n_cores,
+                   silent = TRUE)
+```
+
+```{r}
+plot(vowels_fit2)
+
+vowels_fit2 |> 
+  conditional_effects() |> 
+  plot()
+```
+
+Мы видим, что графики эффектов идентичны, однако графики коэффециентов разные, потому что эффекты теперь закодированы не друг относительно друга, а как некоторое средние между группами $\pm$ некоторое значение, отраженное в коэффициенте $\hat\beta_1$ (в нашем случае, если выразить все при помощи средних --- 89.38 $\pm$ 11.18)
+
+```{r}
+vowels_fit2
+```
+
+### One-hot encoding
+
+Существует еще одна стратегия: оставить все dummy-переменные и убрать случайный член, тогда регрессия будет оценивать каждый уровень переменной, создавая для него отдельный коэффициент.
+
+```{r vowels_fit3}
+#| cache: true
+
+vowels_fit3 <- brm(vowel.dur ~ -1 + aspiration,
+                   data = vowels,
+                   cores = n_cores,
+                   silent = TRUE)
+```
+
+```{r}
+plot(vowels_fit3)
+
+vowels_fit3 |> 
+  conditional_effects() |> 
+  plot()
+
+vowels_fit3
+```
+
+Использование данной стратегии имеет свой недостаток: у нас исчезают переменные, сравнивающие группы, так что мы не можем проанализировав коэффициенты что-то понять про наличие разницы между ними.
+
+### Другие контрасты
+
+- Repeated contrasts: контрасты для анализа упорядоченных переменных (например, образование, возраст и т. п.)
+-  Helmert contrasts: первый контрсат сравнивает между уровнями L1 и L2, следующий сравнивает уровне L3 и средние между (L1 и L2), следующий сравнивает L4 и среднее между (L1, L2 и L3) и т. д.
+- и другие
+
+Вообще есть семейство функций, позволяющее задать контрасты:
+
+- `contr.treatment()`
+- `contr.sum()`
+- `contr.helmert()`
+- `contr.poly()`
+
+
+## Иерархические модели
+
+Одним из важных предположений регрессионного анализа является независимость наблюдений друг от друга. Однако часто в данных можно встретить различные группировки наблюдений, которые следует учитывать. В статистическом моделировании принято различать разные методы для борьбы с независимостью наблюдений. Во-первых, группировку можно разметить и добавить в основные эффекты регрессии. Если эта группировка как-то важна для исследования, то оценка параметров такого варьирования будет иметь смысл. Однако бывают такого рода группировки, которые нам неинтересно вставлять в основные эффекты регрессии: нам хочется сделать обобщение внутри группировки, а потом построить обобщение над обобщениями. Использование такого рода модель позволяет
+
+- признать, что в данных есть нарушение независимости наблюдений друг от друга;
+- учесть эффект группировок;
+- и абстрагироваться от группировок, делая предсказания в том числе для таких уровней группы, которых мы еще не наблюдаем в наших данных.
+
+Такого рода модели называют моделями со смешанными эффектами. При моделировании при помощи моделей со случайными эффектами различают:
+
+- *основные эффекты* -- это те связи, которые нас интересуют, независимые переменные (скорость речи, наличие придыхания...);
+- *случайные эффекты* -- это те переменные, которые создают группировку в данных (корпус, носитель, стимул и т. п.).
+
+В результате моделирования появляется обобщенная модель, которая игнорирует группировку, а потом для каждого значения случайного эффекта генерируется своя регрессия, отсчитывая от обобщенной модели как от базового уровня.
+
+```{r}
+#| echo: false
+#| fig-cap: "Из 'Introduction to Bayesian Data Analysis for Cognitive Science' Bruno Nicenboim, Daniel J. Schad, and Shravan Vasishth"
+
+knitr::include_graphics("images/dags1-1.png")
+```
+
+В заданиях выше, когда мы предсказывали скорость речи, мы все время отфильтровывали одного конкретного носителя и делали модель для него. Это связано с тем, что носитель --- это образцовый пример случайного эффекта. Давайте теперь попробуем смоделировать скорость речи для всех носителей из звинигородского корпуса
+
+```{r}
+df <- read_csv("https://raw.githubusercontent.com/agricolamz/2026_HSE_b_da4l/master/data/speech_tempo_zvenigorod.csv")
+```
+
+Случайные эффекты записываются в круглых скобках. Почему перед ним тоже нужно писать 1 (что означает интерсепт) станет ясно из примеров ниже. Давайте сравним априорные распределения по-умолчанию, которые предлагает `brms` для моделей со смешанными эффектами и для моделей без них:
+
+```{r}
+get_prior(speech_tempo ~ 1,
+          data = df,
+          family = gaussian())
+
+get_prior(speech_tempo ~ (1|speaker),
+          data = df,
+          family = gaussian())
+```
+
+Как видно добавились много параметров `sd`, которыми принято обозначать параметры вариативности модели внутри групп, в то время как `sigma` продолжает быть параметром, определяющим вариативность между группами.
+
+```{r hierarchical}
+#| cache: true
+#| message: false
+
+fit_hierarchical <- brm(speech_tempo ~ (1|speaker),
+                        data = df,
+                        family = gaussian(),
+                        cores = n_cores,
+                        silent = TRUE,
+                        prior = c(prior(normal(5.31, 1.93), class = "Intercept", lb = 0),
+                                  prior(normal(2, 5), class = "sigma", lb = 0),
+                                  prior(normal(2, 10), class = "sd")),
+                        iter = 4000,
+                        control = list(adapt_delta = .85))
+```
+
+```{r}
+fit_hierarchical
+
+plot(fit_hierarchical)
+```
+
+В случаях, когда у нас нет предикторов, визуализация параметров иллюстрирует необходимые распределения.
+
+## Другие варианты моделей с группировками
+
+### Complete pooling model
+
+```{r}
+#| echo: false
+#| fig-cap: "Из 'Introduction to Bayesian Data Analysis for Cognitive Science' Bruno Nicenboim, Daniel J. Schad, and Shravan Vasishth"
+
+knitr::include_graphics("images/dags3-1.png")
+```
+
+```{r complete_pooling}
+#| cache: true
+#| message: false
+
+fit_complete_pooling <- brm(speech_tempo ~ 1,
+                            data = df,
+                            family = gaussian(),
+                            cores = n_cores,
+                            silent = TRUE)
+```
+
+```{r}
+fit_complete_pooling
+
+plot(fit_complete_pooling)
+```
+
+### No pooling model
+
+```{r}
+#| echo: false
+#| fig-cap: "Из 'Introduction to Bayesian Data Analysis for Cognitive Science' Bruno Nicenboim, Daniel J. Schad, and Shravan Vasishth"
+
+knitr::include_graphics("images/dags2-1.png")
+```
+
+```{r no_pooling}
+#| cache: true
+#| message: false
+
+fit_no_pooling <- brm(speech_tempo ~ 0 + speaker,
+                      data = df,
+                      family = gaussian(),
+                      cores = n_cores,
+                      silent = TRUE,
+                      prior = c(prior(normal(2, 5), class = "sigma", lb = 0),
+                                prior(normal(0, 10), class = "b", lb = 0)))
+```
+
+```{r}
+fit_no_pooling
+
+plot(fit_no_pooling)
+```
+
+## Модель со случайным эффектом: добавляем предикторы
+
+```{r hierarchical-intercept}
+#| cache: true
+#| message: false
+
+fit_hierarchical_intercept <- brm(speech_tempo ~ I(log(n_vowels)) + (1|speaker),
+                                  data = df,
+                                  family = gaussian(),
+                                  cores = n_cores,
+                                  silent = TRUE,
+                                  prior = c(prior(normal(5.31, 1.93), class = "Intercept", lb = 0),
+                                            prior(normal(2, 5), class = "sigma", lb = 0),
+                                            prior(normal(2, 10), class = "sd")),
+                                                              
+                                  iter = 4000,
+                                  control = list(adapt_delta = .85))
+```
+
+```{r}
+fit_hierarchical_intercept
+
+plot(fit_hierarchical_intercept)
+
+fit_hierarchical_intercept |> 
+  conditional_effects() |> 
+  plot(points = TRUE)
+```
+
+Cлучайные члены для каждого носителя
+
+```{r}
+ranef(fit_hierarchical_intercept)$speaker[,,"Intercept"] |> 
+  as.data.frame() |> 
+  rownames_to_column("speaker") |> 
+  ggplot(aes(y = speaker, x = Estimate)) +
+  geom_errorbar(aes(xmin = `Q2.5`, xmax = `Q97.5`))+
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point()
+```
+
+
+```{r hierarchical-intercept-slope}
+#| cache: true
+#| message: false
+
+fit_hierarchical_intercept_slope <- brm(speech_tempo ~ I(log(n_vowels)) + (I(log(n_vowels)) + 1|speaker),
+                                  data = df,
+                                  family = gaussian(),
+                                  cores = n_cores,
+                                  silent = TRUE,
+                                  prior = c(prior(normal(5.31, 1.93), class = "Intercept", lb = 0),
+                                            prior(normal(2, 5), class = "sigma", lb = 0),
+                                            prior(normal(2, 10), class = "sd")),
+                                  iter = 4000,
+                                  control = list(adapt_delta = .85))
+
+```
+
+```{r}
+fit_hierarchical_intercept_slope
+
+plot(fit_hierarchical_intercept_slope)
+
+fit_hierarchical_intercept_slope |> 
+  conditional_effects() |> 
+  plot(points = TRUE)
+```
+
+Cлучайные члены для каждого носителя
+
+```{r}
+ranef(fit_hierarchical_intercept_slope)$speaker[,,"Intercept"] |> 
+  as.data.frame() |> 
+  rownames_to_column("speaker") |> 
+  ggplot(aes(y = speaker, x = Estimate)) +
+  geom_errorbar(aes(xmin = `Q2.5`, xmax = `Q97.5`))+
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point()
+```
+
+Угловой кэффициент для каждого носителя
+
+```{r}
+ranef(fit_hierarchical_intercept_slope)$speaker[,,"Ilogn_vowels"] |> 
+  as.data.frame() |> 
+  rownames_to_column("speaker") |> 
+  ggplot(aes(y = speaker, x = Estimate)) +
+  geom_errorbar(aes(xmin = `Q2.5`, xmax = `Q97.5`))+
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point()
+```
+
+```{r hierarchical-slope}
+#| cache: true
+#| message: false
+
+fit_hierarchical_slope <- brm(speech_tempo ~ I(log(n_vowels)) + (I(log(n_vowels)) + 0|speaker),
+                              data = df,
+                              family = gaussian(),
+                              cores = n_cores,
+                              silent = TRUE,
+                              prior = c(prior(normal(5.31, 1.93), class = "Intercept", lb = 0),
+                                        prior(normal(2, 5), class = "sigma", lb = 0),
+                                        prior(normal(2, 10), class = "sd")),
+                              iter = 4000,
+                              control = list(adapt_delta = .85))
+```
+
+```{r}
+fit_hierarchical_slope
+
+plot(fit_hierarchical_slope)
+
+fit_hierarchical_slope |> 
+  conditional_effects() |> 
+  plot(points = TRUE)
+```
+
+Угловой кэффициент для каждого носителя
+
+```{r}
+ranef(fit_hierarchical_slope)$speaker[,,"Ilogn_vowels"] |> 
+  as.data.frame() |> 
+  rownames_to_column("speaker") |> 
+  ggplot(aes(y = speaker, x = Estimate)) +
+  geom_errorbar(aes(xmin = `Q2.5`, xmax = `Q97.5`))+
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point()
+```
+
+
+::: {.callout-note}
+В работе [@ota2009] описывается эксперимент, в котором арабским и японским билингвам показывали английские слова и просили их определить, относятся ли они к одной семантической группе. В словах были в том числе и фонетически близкие слова, которые различаются фонемами, которых нет в L1. В [датасет](https://raw.githubusercontent.com/agricolamz/2026_HSE_b_da4l/master/data/ota2009_key_rock.csv) записан фрагмент данных, в которых стимулы не связаны. Постройте регрессионную модель, предсказывающую время реакции (`Words.RT`) на основе того, верно ли испытуемый (`Subject`) выполнил задание (`Words.ACC`). Я использовал sum contrast.
+:::
+
+```{r ota2009}
+#| cache: true
+#| echo: false
+#| message: false
+
+df <- read_csv("https://raw.githubusercontent.com/agricolamz/2026_HSE_b_da4l/master/data/ota2009_key_rock.csv")
+
+df$Words.ACC <- factor(df$Words.ACC)
+contrasts(df$Words.ACC) <- c(1, -1)
+
+fit_mixed <- brm(Words.RT ~ Words.ACC + (1|Subject),
+                 data = df,
+                 cores = n_cores, 
+                 silent = TRUE, 
+                 prior = c(prior(normal(1500, 500), class = "Intercept", lb = 0),
+                           prior(normal(0, 500), class = "b"),
+                           prior(normal(2000, 1000), class = "sigma", lb = 0),
+                           prior(normal(2000, 1000), class = "sd")))
+
+plot(fit_mixed)
+
+fit_mixed |> 
+  conditional_effects() |> 
+  plot()
+```
+
