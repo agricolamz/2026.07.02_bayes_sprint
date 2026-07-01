@@ -16,6 +16,8 @@ book:
     - 05-confidence-intervals.qmd
     - 06-Bayes-factor.qmd
     - 07-Introduction-to-MCMC.qmd
+    - 08-introduction_to_bayesian_regression_with_brms.qmd
+    - 09-Empirical-Bayes.qmd
     
 execute:
   freeze: auto

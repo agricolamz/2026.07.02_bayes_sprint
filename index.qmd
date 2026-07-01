@@ -40,5 +40,4 @@ packageVersion("fitdistrplus")
 packageVersion("ggeffects")
 packageVersion("rstan")
 packageVersion("brms")
-packageVersion("tidybayes")
 ```
