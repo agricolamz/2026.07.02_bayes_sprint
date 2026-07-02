@@ -26,25 +26,25 @@ editor_options:
 #| echo: false
 #| layout-ncol: 3
 #| fig-subcap:
-#|   - "[@gelman2026]"
 #|   - "[@mcelreath2020]"
 #|   - "[@gelman2014]"
+#|   - "[@albert2019]"
 #|   - "[@kruschke2014]"
 #|   - "[@robinson2017]"
-#|   - "[@efron2017]"
+#|   - "[@gelman2026]"
 
-knitr::include_graphics("images/01.png")
 knitr::include_graphics("images/02.jpg")
 knitr::include_graphics("images/03.png")
+knitr::include_graphics("images/06.png")
 knitr::include_graphics("images/04.png")
 knitr::include_graphics("images/05.png")
-knitr::include_graphics("images/06.png")
+knitr::include_graphics("images/01.png")
 ```
 
-Еще ссылки:
+Еще немного ссылок:
 
 - [Bruno Nicenboim, Daniel J. Schad, and Shravan Vasishth --- Introduction to Bayesian Data Analysis for Cognitive Science](https://bruno.nicenboim.me/bayescogsci/)
-- [Kevin Ross --- An Introduction to Bayesian Reasoning and Methods](An Introduction to Bayesian Reasoning and Methods)
+- [Kevin Ross --- An Introduction to Bayesian Reasoning and Methods](https://bookdown.org/kevin_davisross/bayesian-reasoning-and-methods/)
 - [Alicia A. Johnson, Miles Ott, Mine Dogucu --- Bayes rules!](https://www.bayesrulesbook.com/)
 - [Olivier Gimenez --- Bayesian analysis of capture-recapture data with hidden Markov models: Theory and case studies in R and NIMBLE](https://oliviergimenez.github.io/banana-book/index.html)
 - [A Solomon Kurz --- Doing Bayesian Data Analysis in brms and the tidyverse](https://solomon.quarto.pub/dbda2/)
